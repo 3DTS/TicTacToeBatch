@@ -9,8 +9,8 @@ set /p "p1="
 echo.[94mPlayer 2[0m:
 set /p "p2="
 
-if "%p1%" == "" set p1=Player 1
-if "%p2%" == "" set p2=Player 2
+if "%p1%" == "" set "p1=Player 1"
+if "%p2%" == "" set "p2=Player 2"
 
 set player1=[91m%p1%[0m
 set player2=[94m%p2%[0m
@@ -35,9 +35,9 @@ set nine=9
 
 cls
 
-set "up= [90m%seven%[0m | [90m%eight%[0m | [90m%nine%[0m"
-set "mid= [90m%four%[0m | [90m%five%[0m | [90m%six%[0m"
-set "low= [90m%one%[0m | [90m%two%[0m | [90m%three%[0m"
+set "up= [90m!seven![0m | [90m!eight![0m | [90m!nine![0m"
+set "mid= [90m!four![0m | [90m!five![0m | [90m!six![0m"
+set "low= [90m!one![0m | [90m!two![0m | [90m!three![0m"
 
 :PRINT_FIELD
 echo.!up!
@@ -53,8 +53,9 @@ IF "%current_player%" == "%player1%" (
 ) else (
 	set /p "input=%player2%: "
 )
-echo INPUT=!input!
+REM echo INPUT=!input!
 
+REM Set the upper and lower limit for the stringmanipulation to extract the currently selected symbol
 set /a low_end=!input!-1
 set /a up_end=!input!-9
 
@@ -70,8 +71,9 @@ REM Extract character on the position specified by "input".
 call set x=%%field:~!low_end!,1%%
 echo.%x%
 
-REM IF-Statement funzt nicht------------------------------------------------------------------------------------------------------------------------------------------
-IF "%x%"=="0" (
+REM Check if Symbol was already selected.
+IF "!x!"=="0" (
+	echo true
 	pause
 	GOTO SET_SYMBOL
 ) else (
@@ -81,45 +83,48 @@ IF "%x%"=="0" (
 	pause
 	GOTO GET_INPUT
 )
-pause
 :_END_GET_INPUT
 
 :SET_SYMBOL
-IF "%current_player%" == "%player1%" (
+IF "!current_player!" == "!player1!" (
 	set symbol=X
-	set current_player=%player2%
+	set current_player=!player2!
 ) else (
 	set symbol=O
-	set current_player=%player2%
+	set current_player=!player1!
 )
 
-IF /I %input%==1 (
+IF "!input!" == "1" (
 	set one=%symbol%
+	echo.!one!
+	echo.%one%
 ) else (
-	IF /I !input!==2 (
+	IF "!input!" == "2" (
 		set two=%symbol%
 	) else (
-		IF /I !input!==3 (
+		IF "!input!"=="3" (
 			set three=%symbol%
 		) else (
-			IF /I !input!==4 (
+			IF "!input!"=="4" (
 				set four=%symbol%
 			) else (
-				IF /I !input!==5 (
+				IF "!input!"=="5" (
 					set five=%symbol%
 				) else (
-					IF /I !input!==6 (
+					IF "!input!"=="6" (
 						set six=%symbol%
 					) else (
-						IF /I !input!==7 (
+						IF "!input!"=="7" (
 							set seven=%symbol%
 						) else (
-							IF /I !input!==8 (
+							IF "!input!"=="8" (
 								set eight=%symbol%
 							) else (
-								IF /I !input!==9 (
+								IF "!input!"=="9" (
 									set nine=%symbol%
-								) else ()
+								) else (
+									echo ERROR
+								)
 							)
 						)
 					)
@@ -128,7 +133,14 @@ IF /I %input%==1 (
 		)
 	)
 )
+
+echo.End of selection
+pause
 GOTO PRINT_FIELD
 :_END_SET_SYMBOL
+
+:INVALID_INPUT
+
+:_END_INVALID_INPUT
 
 pause
