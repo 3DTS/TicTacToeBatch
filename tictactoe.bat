@@ -1,6 +1,44 @@
 @echo off
-cls
 setlocal enableDelayedExpansion
+TITLE TicTacToe
+set spaces=                         
+:TITLE
+cls
+echo  _____   _   ___    _____     ___     ___    _____   _____   ___
+echo ^|_   _^| ^| ^| ^|  _^|  ^|_   _^|   / _ \   ^|  _^|  ^|_   _^| ^|  _  ^| ^| __^|
+echo   ^| ^|   ^| ^| ^| ^|_     ^| ^|    / /_\ \  ^| ^|_     ^| ^|   ^| ^|_^| ^| ^| _^|
+echo   ^|_^|   ^|_^| ^|___^|    ^|_^|   /_/   \_\ ^|___^|    ^|_^|   ^|_____^| ^|___^|
+echo.
+echo.
+echo %spaces% 1. Start
+echo %spaces% 2. Settings
+echo %spaces% 3. Exit
+echo.
+echo Type in the number of the option to go to:
+set /p menu_select=
+
+REM Jump to the 
+IF %menu_select% == 1 (
+	GOTO START
+	) ELSE (
+		IF %menu_select% == 2 (
+			GOTO SETTINGS
+		) ELSE (
+			IF %menu_select% == 3 (
+				GOTO EXIT
+			) ELSE (
+				echo Invalid input!
+				pause
+				GOTO TITLE
+				)
+			)
+		)
+	)
+)
+REM ---To be added---
+:SETTINGS
+GOTO TITLE
+
 :START
 :SET_PLAYER
 REM Set player color.
@@ -182,7 +220,9 @@ IF !sum! == -15 (
 GOTO !VICTORY_CHECK_PTR!
 
 :VICTORY_MESSAGE
-IF !victory! == 1 echo.!current_player! wins!
+IF !victory! == 1 echo.!current_player! wins^^!
 :_END_VICTORY
 
+:EXIT
+echo Goodbye^^!
 pause
