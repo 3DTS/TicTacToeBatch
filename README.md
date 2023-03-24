@@ -29,7 +29,7 @@ If a victory was was found `:CHECK_VICTORY` returns 1 or 2 according to "Player 
 
 ##### Batch `call` and `exit`
 - [`call` Documentation](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/call)
-- [`exit` Docimentation](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/exit)
+- [`exit` Documentation](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/exit)
 
 ##### Magic Square:
 - [Wikipedia](https://en.wikipedia.org/wiki/Magic_square)
