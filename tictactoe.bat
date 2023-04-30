@@ -193,7 +193,7 @@ IF !victory! NEQ 0 (
 	echo.!victory! wins^^!
 	GOTO GAME_END
 )
-IF !turn! EQU 9 (
+IF !turn! GEQ 9 (
 	echo.Draw^^!
 	GOTO GAME_END
 )
@@ -213,9 +213,6 @@ REM Check if input is correct.
 :CHECK_INPUT
 REM Go back to title.
 IF !input! EQU 0 GOTO TITLE
-
-REM x is used to select the array position.
-REM set /a x=!input!-1
 
 REM If "input" is equal to the content on that array position (= field), 
 REM the field is empty and can be filled with a symbol.
@@ -259,98 +256,87 @@ IF !turn! GEQ 5 (
 GOTO PRINT_FIELD
 
 :COMPUTER
-set computer_move=-2
-
-echo Thinking...
-
-FOR /L %%i IN (1 1 9) DO (
-	echo CELL %%i
-	IF /I !!field[%%i].content!! EQU %%i (
-		IF !computer_no! EQU 1 (
-			set field[%%i].content=X
-			set field[%%i].square=!field[%%i].square:~-1!
-			CALL :MINIMAX !turn! 2
-		)
-		IF !computer_no! EQU 2 (
-			set field[%%i].content=O
-			set field[%%i].square=-!field[%%i].square:~-1!
-			CALL :MINIMAX !turn! 1
-		)
-		set /a tmp_score=-!errorlevel!
-		
-		set field[%%i].content=%%i
-		set field[%%i].square=X!field[%%i].square:~-1!
-		
-		IF !tmp_score! GTR !computer_move! (
-			set computer_move=!tmp_score!
-			set input=%%i
-		)
-	)
-	
-)
+CALL :MINIMAX 0 !computer_no! -1000 1000
+echo ERRORLEVEL: !errorlevel!
+pause > nul
 GOTO CHECK_INPUT
 
 REM PARAMETERS:
-REM depth player_no
+REM depth   player_no   alpha   beta
 :MINIMAX
-set /a iteration=!iteration!+1
+set alpha=%3
+set beta=%4
+
 FOR /L %%i IN (0 1 7) DO (
 	CALL :CHECK_VICTORY !!win[%%i]!! M
-	IF !errorlevel! EQU !computer_no! EXIT /b 1
-	IF !errorlevel! NEQ 0 EXIT /b -1
+	IF !errorlevel! EQU !computer_no! EXIT /b 1000
+	IF !errorlevel! NEQ 0 EXIT /b -1000
 )
 
 IF %1 GEQ 9 EXIT /b 0
+set /a depth=%1+1
 
 IF %2 EQU !computer_no! (
-	set best_score=-10
+	set best_score=-1000
+	
 	FOR /L %%i IN (1 1 9) DO (
 		IF /I !!field[%%i].content!! EQU %%i (
-			set /a depth=%1+1
 			IF !computer_no! EQU 1 (
 				set field[%%i].content=X
 				set field[%%i].square=!field[%%i].square:~-1!
-				CALL :MINIMAX !depth! 2
+				CALL :MINIMAX !depth! 2 !alpha! !beta!
 			)
 			IF !computer_no! EQU 2 (
 				set field[%%i].content=O
 				set field[%%i].square=-!field[%%i].square:~-1!
-				CALL :MINIMAX !depth! 1
+				CALL :MINIMAX !depth! 1 !alpha! !beta!
 			)
-			set /a score=-!errorlevel!
+			set score=!errorlevel!
 			
-			IF !score! GTR !best_score! set best_score=!score!
+			IF !score! GTR !best_score! set /a best_score=!score!+!depth!*10
+			IF !best_score! GTR !alpha! set alpha=!best_score!
 			set field[%%i].content=%%i
 			set field[%%i].square=X!field[%%i].square:~-1!
 		)
+		IF %1 EQU 0 set input=%%i
+		IF !alpha! GEQ !beta! (
+			REM set input=%%i
+			echo !alpha! !beta!
+			GOTO _EXIT_MINIMAX
+		)
 	)
 ) ELSE (
-	set best_score=10
+	set best_score=1000
 	
 	FOR /L %%i IN (1 1 9) DO (
 		IF /I !!field[%%i].content!! EQU %%i (
-			set /a depth=%1+1
 			IF !computer_no! NEQ 1 (
 				set field[%%i].content=X
 				set field[%%i].square=!field[%%i].square:~-1!
-				CALL :MINIMAX !depth! 2
+				CALL :MINIMAX !depth! 2 !alpha! !beta!
 			)
 			IF !computer_no! NEQ 2 (
 				set field[%%i].content=O
 				set field[%%i].square=-!field[%%i].square:~-1!
-				CALL :MINIMAX !depth! 1
+				CALL :MINIMAX !depth! 1 !alpha! !beta!
 			)
-			set /a score=-!errorlevel!
+			set score=!errorlevel!
 			
-			IF !score! LSS !best_score! set best_score=!score!
+			IF !score! LSS !best_score! set /a best_score=-!score!-!depth!*10
+			IF !best_score! LSS !beta! set beta=!best_score!
 			set field[%%i].content=%%i
 			set field[%%i].square=X!field[%%i].square:~-1!
 		)
+		IF %1 EQU 0 set input=%%i
+		IF !alpha! GEQ !beta! (
+			REM set input=%%i
+			echo !alpha! !beta!
+			GOTO _EXIT_MINIMAX
+		)
 	)
 )
-echo DEPTH !depth!
-echo ITERATION !iteration!
 
+:_EXIT_MINIMAX
 EXIT /b !best_score!
 
 
@@ -364,13 +350,12 @@ set minimax=%4
 
 REM Check if sum is equal to 15 or -15.
 REM If that is the case, highlight the winning fields.
+REM Set output variable to the number of winning player.
 IF !sum! EQU 15 set v=1
 IF !sum! EQU -15 set v=2
 
 REM Skip highlighting if minimax-algorithm calls this function.
-IF defined minimax (
-	EXIT /b !v!
-)
+IF defined minimax EXIT /b !v!
 
 REM Invert field colors to highlight them.
 IF !v! NEQ 0 (
